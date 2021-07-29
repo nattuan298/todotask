@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { TaskStatus } from './task-status.emun';
+import { ApiPropertyOptions } from '@nestjs/swagger';
 
 @Entity()
 export class Task extends BaseEntity {

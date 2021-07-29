@@ -14,21 +14,21 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { GetUser } from 'src/auth/get-user.decorator';
 import { User } from 'src/auth/user.entity';
-import { CreateTaskDto } from './dto/create-task.dto';
+import { CreateTaskDto, UpdateTaskDto } from './dto/create-task.dto';
 import { GetTasksFilterDto } from './dto/get-tasks-filter.dto';
-import { TaskStatusValidationPipe } from './pipes/task-status-validation.pipe';
-import { TaskStatus } from './task-status.emun';
 import { Task } from './task.entity';
 import { TasksService } from './tasks.service';
 
+@ApiBearerAuth()
+@ApiTags('Tasks')
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
   private logger = new Logger('TasksController');
   constructor(private readonly tasksService: TasksService) {}
-
   @Get()
   @UsePipes(ValidationPipe)
   getTasks(@Query() filterDto: GetTasksFilterDto, @GetUser() user: User) {
@@ -63,12 +63,13 @@ export class TasksController {
   }
 
   @Patch('/status/:id')
+  @ApiBody({ type: UpdateTaskDto })
   updateTaskStatus(
     @Param('id', ParseIntPipe) id: number,
-    @Body('status', TaskStatusValidationPipe) status: TaskStatus,
+    @Body(ValidationPipe) updateTaskDto: UpdateTaskDto,
     @GetUser() user: User,
   ): Promise<Task> {
-    return this.tasksService.updateTaskStatus(id, status, user);
+    return this.tasksService.updateTaskStatus(id, updateTaskDto, user);
   }
 
   @Delete('/:id')
